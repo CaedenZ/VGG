@@ -273,8 +273,8 @@ def generate_seq_img(model,epoch,test_sample,batch_size,img_dim,img_dict):
 
 ## configure strategy for gpu
 
-# strategy = tf.distribute.MirroredStrategy(gpu_devices)
-strategy = None
+strategy = tf.distribute.MirroredStrategy(gpu_devices)
+# strategy = None
 
 # for i, layer in enumerate(cnn_model.encoder.layers):
 #    print(i, layer.name)
