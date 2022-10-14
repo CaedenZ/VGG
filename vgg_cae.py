@@ -45,7 +45,7 @@ import re
 import shutil
 from time import time
 import random
-from models import VGG_TAE,VGG_AE,CVAE,SENet,SimpleCAE,SuperSimpleCAE,SuperSimpleCAE_KernelIncrease
+from models import VGG_TAE,VGG_AE,CVAE,SENet,SimpleCAE,SuperSimpleCAE,SuperSimpleCAE_KernelIncrease,ShrinkCAE,DirectCAE
 
 
 def split_img(img):
@@ -163,7 +163,7 @@ def pred_train_func(model,x,y,optimizer,strategy=None): ## training for predicti
 def run_training(train_ds,test_ds,epochs,test_sample,img_dict,batch_size,img_dim,strategy=None):
     # with strategy.scope(): ## just need set initalization of model and optimizer inside
         ## model
-    cnn_model = SuperSimpleCAE_KernelIncrease() ## VGG_AE for reconstruction of img, not temporal
+    cnn_model = DirectCAE() ## VGG_AE for reconstruction of img, not temporal
     optimizer = tf.keras.optimizers.Adam(lr = 1e-4) # lr = 0.001
     generate_save_img(cnn_model,0,test_sample,batch_size,img_dim,img_dict)
     ### training
@@ -280,12 +280,12 @@ strategy = None
 # for i, layer in enumerate(cnn_model.encoder.layers):
 #    print(i, layer.name)
 # cnn_model.encoder.summary()
-img_h,img_w = 224,224
+img_h,img_w = 256 ,448
 img_dim = (img_h,img_w)
 # batch_size = 32 * strategy.num_replicas_in_sync
 seq_length = 20
 batch_size = 16 
-num_epochs = 1
+num_epochs = 10
 train_size = 0.8
 
 result_img_dict = 'test' ## set your results folder here

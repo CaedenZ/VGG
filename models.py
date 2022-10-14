@@ -102,15 +102,69 @@ class CVAE(tf.keras.Model):
     def decode(self,inputs):
         img_array = self.decoder(inputs)
         return img_array
+
+class ShrinkCAE(tf.keras.Model):
+    def __init__(self):
+        super(ShrinkCAE, self).__init__()
+        # Build Encoder
+        self.encoder = Sequential()
+        self.encoder.add(Conv2D(input_shape=(256,448,3),filters=32,kernel_size=(3,3),padding="same", activation="relu"))
+        self.encoder.add(Conv2D(filters=32,kernel_size=(3,3),padding="same", activation="relu"))
+        self.encoder.add(MaxPooling2D(pool_size=(4,4),strides=(4,4)))
+        self.encoder.add(Conv2D(filters=16, kernel_size=(3,3), padding="same", activation="relu"))
+        self.encoder.add(Conv2D(filters=16, kernel_size=(3,3), padding="same", activation="relu"))
+        self.encoder.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+        self.encoder.add(Conv2D(filters=8, kernel_size=(3,3), padding="same", activation="relu"))
+        self.encoder.add(Conv2D(filters=8, kernel_size=(3,3), padding="same", activation="relu"))
+        self.encoder.add(Conv2D(filters=8, kernel_size=(3,3), padding="same", activation="relu"))
+        self.encoder.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+        self.encoder.add(Conv2D(filters=8, kernel_size=(3,3), padding="same", activation="relu"))
+        self.encoder.add(Conv2D(filters=8, kernel_size=(3,3), padding="same", activation="relu"))
+        self.encoder.add(Conv2D(filters=8, kernel_size=(3,3), padding="same", activation="relu"))
+        self.encoder.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+
+        # Build Decoder
+
+        self.decoder = Sequential()
+        self.decoder.add(UpSampling2D(size=(2,2)))
+        self.decoder.add(Conv2DTranspose(filters=8,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=8,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=8,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(UpSampling2D(size=(2,2)))
+        self.decoder.add(Conv2DTranspose(filters=8,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=8,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=8,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(UpSampling2D(size=(2,2)))
+        self.decoder.add(Conv2DTranspose(filters=16,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=16,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(UpSampling2D(size=(2,2)))
+        self.decoder.add(Conv2DTranspose(filters=16,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=16,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(UpSampling2D(size=(2,2)))
+        self.decoder.add(Conv2DTranspose(filters=32,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=32,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=3,kernel_size = (3,3),padding = 'same',activation = 'relu'))
+
+        self.encoder.trainable = True
+        self.decoder.trainable = True
+
+    def encode(self,inputs):
+        img_array = self.encoder(inputs)
+        return img_array
+    
+    def decode(self,inputs):
+        img_array = self.decoder(inputs)
+        return img_array
         ### output should be (224,224,3)
 class SimpleCAE(tf.keras.Model):
     def __init__(self):
         super(SimpleCAE, self).__init__()
         # Build Encoder
         self.encoder = Sequential()
-        self.encoder.add(Conv2D(input_shape=(224,224,3),filters=64,kernel_size=(3,3),padding="same", activation="relu"))
-        self.encoder.add(Conv2D(filters=64,kernel_size=(3,3),padding="same", activation="relu"))
-        self.encoder.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+        self.encoder.add(Conv2D(input_shape=(224,224,3),filters=16,kernel_size=(3,3),padding="same", activation="relu"))
+        self.encoder.add(Conv2D(filters=16,kernel_size=(3,3),padding="same", activation="relu"))
+        self.encoder.add(Dense())
+        self.encoder.add(MaxPooling2D(pool_size=(8,8),strides=(8,8)))
 
         # Build Decoder
 
@@ -157,6 +211,32 @@ class SuperSimpleCAE(tf.keras.Model):
         img_array = self.decoder(inputs)
         return img_array
         ### output should be (224,224,3)
+
+class DirectCAE(tf.keras.Model):
+    def __init__(self):
+        super(DirectCAE, self).__init__()
+        # Build Encoder
+        self.encoder = Sequential()
+        self.encoder.add(Conv2D(input_shape=(256,448,3),filters=8,kernel_size=(3,3),padding="same", activation="relu"))
+        self.encoder.add(MaxPooling2D(pool_size=(16,16),strides=(16,16)))
+
+        # Build Decoder
+
+        self.decoder = Sequential()
+        self.decoder.add(UpSampling2D(size=(16,16)))
+        self.decoder.add(Conv2DTranspose(filters=8,kernel_size=(3,3),padding="same",activation="relu"))
+        self.decoder.add(Conv2DTranspose(filters=3,kernel_size = (3,3),padding = 'same',activation = 'relu'))
+
+        self.encoder.trainable = True
+        self.decoder.trainable = True
+
+    def encode(self,inputs):
+        img_array = self.encoder(inputs)
+        return img_array
+    
+    def decode(self,inputs):
+        img_array = self.decoder(inputs)
+        return img_array
 
 class SuperSimpleCAE_KernelIncrease(tf.keras.Model):
     def __init__(self):
