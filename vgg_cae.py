@@ -45,7 +45,7 @@ import re
 import shutil
 from time import time
 import random
-from models import VGG_TAE,VGG_AE,CVAE,SENet
+from models import VGG_TAE,VGG_AE,CVAE,SENet,SimpleCAE,SuperSimpleCAE,SuperSimpleCAE_KernelIncrease
 
 
 def split_img(img):
@@ -163,7 +163,7 @@ def pred_train_func(model,x,y,optimizer,strategy=None): ## training for predicti
 def run_training(train_ds,test_ds,epochs,test_sample,img_dict,batch_size,img_dim,strategy=None):
     # with strategy.scope(): ## just need set initalization of model and optimizer inside
         ## model
-    cnn_model = CVAE() ## VGG_AE for reconstruction of img, not temporal
+    cnn_model = SuperSimpleCAE_KernelIncrease() ## VGG_AE for reconstruction of img, not temporal
     optimizer = tf.keras.optimizers.Adam(lr = 1e-4) # lr = 0.001
     generate_save_img(cnn_model,0,test_sample,batch_size,img_dim,img_dict)
     ### training
@@ -188,7 +188,8 @@ def run_training(train_ds,test_ds,epochs,test_sample,img_dict,batch_size,img_dim
         testloss.append(np.round(test_loss.numpy(),2))
         print (f'epoch: {epoch+1} , train loss : {np.round(train_loss.numpy(),2)}, test loss: {np.round(test_loss.numpy(),2)}, time taken : {np.round(time()-st_t,2)}s')
         generate_save_img(cnn_model,epoch+1,test_sample,batch_size,img_dim,img_dict)
-
+    plt.clf()
+    fig = plt.figure()
     plt.plot(trainloss)
     plt.plot(testloss)
     plt.title('model loss')
@@ -273,8 +274,8 @@ def generate_seq_img(model,epoch,test_sample,batch_size,img_dim,img_dict):
 
 ## configure strategy for gpu
 
-strategy = tf.distribute.MirroredStrategy(gpu_devices)
-# strategy = None
+# strategy = tf.distribute.MirroredStrategy(gpu_devices)
+strategy = None
 
 # for i, layer in enumerate(cnn_model.encoder.layers):
 #    print(i, layer.name)
